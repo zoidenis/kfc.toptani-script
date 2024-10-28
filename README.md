@@ -1,84 +1,225 @@
-Description
+Automating Google Chrome in Kiosk Mode Using Selenium
 
-kds.toptani-scripts is a collection of scripts developed specifically to automate processes in Chrome and integrate work with GitHub for KFC Toptani. This documentation includes steps for installing Python, setting up ChromeDriver, running automation scripts, and configuring GitHub for cloning and updating the local repository.
+This guide demonstrates how to automate the opening of Google Chrome, log into a website, and open it in kiosk mode using Selenium in Python.
 
-Requirements
+Requirements: 
 
-	•	Python 3.8+ for script execution.
-	•	Chrome and ChromeDriver for browser-based automation.
-	•	Git for version control and syncing with GitHub.
+1. Python installed on your system. 
+Link: https://www.python.org/downloads/release/python-3130/
 
-Installation Steps
+2. Selenium installed (use `pip install selenium`). 
+Open CMD Run as Administrator
+Type “cd C:\Users\user\AppData\Local\Programs\Python\Python313\Scripts”
+Type “Pip install selenium”
 
-1. Download and Install Python for Windows
+3. Download the ChromeDriver matching your version of Chrome.
+Link: https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.69/win64/chromedriver-win64.zip
+Extract to “C:\ChromeDriver\chromedriver-win64\chromedriver.exe”
 
-	1.	Visit the official Python website and download the latest version of Python for Windows.
-	2.	During installation, make sure to check the Add Python to PATH option.
-	3.	After installation, verify by opening cmd and typing: 
-      python --version
-   	  # This should display the installed Python version.
+4. Git Installation on your system.
+Link: https://github.com/git-for-windows/git/releases/latest
+Open CMD Run as Administrator
+Type “cd C:\Users\user\AppData\Local\Programs\Python\Python313\Scripts”
+Type “git clone https://github.com/zoidenis/kfc.toptani-script.git”
 
-2. Install ChromeDriver
+Python Script: 
 
-	1.	Find the version of Chrome you have installed by going to Settings > About Chrome in your browser.
-	2.	Download the ChromeDriver that matches your version from the ChromeDriver download page.
-	3.	Extract ChromeDriver and place chromedriver.exe in a folder included in PATH or in the same folder as the scripts.
+Here is the Python script that automates the process of opening Google Chrome, logging in, and enabling Kiosk Mode:
 
-3. Install Project Requirements
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 
-	1.	After cloning the repository from GitHub (see GitHub setup steps below), install the project requirements using requirements.txt:
-      pip install -r requirements.txt
 
-Running the Chrome Automation Script
+# Vendosni shtegun e ChromeDriver
+driver_path = r'C:\ChromeDriver\chromedriver-win64\chromedriver.exe'
 
-	1.	Open an editor like Visual Studio Code or a terminal, then navigate to the folder where the script is located.
-	2.	Run the automation script for Chrome. Here’s an example script that uses Selenium to open Chrome:
- 	3.	Make sure path/to/chromedriver.exe matches the location of your chromedriver.exe.
 
-GitHub Setup and Sync with KDS
+# Krijoni opsione për Chrome
+chrome_options = Options()
+# Mbyllni shfletuesin vetëm manualisht
+chrome_options.add_experimental_option("detach", True) 
+# Enable kiosk mode
+chrome_options.add_argument('--kiosk')
 
-1. Configure Git for Local Repository
 
-If not configured previously, set up your Git username and email:
-git config --global user.name "Your Name"
-git config --global user.email "your-email@example.com"
+# Krijoni një instancë të ChromeDriver
+service = Service(driver_path)
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
-2. Clone the Repository from GitHub
 
-	1.	Clone the kds.toptani-scripts repository to your local computer: 
-      git clone https://github.com/[username]/kds.toptani-scripts.git
+# Zëvendësoni me URL-në e faqes suaj të logimit
+driver.get("https://kfcal-live.iprojectdev.com/admin/") 
 
-	2.	Navigate into the cloned directory:
-      cd kds.toptani-scripts
 
-3. Using Git to Fetch Updates from the Repository
+# Pritni disa sekonda për ngarkimin e faqes
+time.sleep(3) 
 
-Once you’ve made changes in your local repository, you can commit and push updates to GitHub:
-   git add .
-   git commit -m "Updates to Chrome automation"
-   git push origin main
 
-To fetch the latest updates from GitHub into your local repository:
-   git pull origin main
+# Pritni derisa fusha e emrit të përdoruesit të jetë e dukshme
+username_field = WebDriverWait(driver, 10).until(
+   EC.presence_of_element_located((By.XPATH, "//input[@name='log[user]']"))
+)
 
-Automating with a .bat Script
 
-To automate the process of pulling updates from GitHub and running the Python script, you can use the following .bat script:
-   @echo off
-   REM Navigate to the folder where the repository is cloned
-   cd C:\Users\user\AppData\Local\Programs\Python\Python313\Scripts\kfc-scripts
+# Dërgoni emrin e përdoruesit me JavaScript
+# Zëvendësoni me emrin tuaj të përdoruesit
+driver.execute_script("arguments[0].value = 'kds.toptani';", username_field) 
 
-   REM Pull the latest version from GitHub
-   git pull origin main
 
-   REM Run the Python script
-   python kds.toptani-bucket.py
+# Pritni derisa fusha e fjalëkalimit të jetë e dukshme
+password_field = WebDriverWait(driver, 10).until(
+   EC.presence_of_element_located((By.XPATH, "//input[@name='log[pass]']"))
+)
 
-   REM Keep the window open to view results
-   pause
 
-Instructions for the .bat Script:
+# Dërgoni fjalëkalimin me JavaScript
+# Zëvendësoni me fjalëkalimin tuaj
+driver.execute_script("arguments[0].value = '1234';", password_field) 
 
-	1.	Save the code above in a file named run_kds_script.bat.
-	2.	Adjust the path (cd C:\Users\user\AppData\Local\Programs\Python\Python313\Scripts\kfc-scripts) on line 2 to match the location of your repository.
-	3.	Run run_kds_script.bat to automatically pull updates and execute the Python script.
+
+# Gjeni butonin e dërgimit dhe klikoni
+submit_button = WebDriverWait(driver, 15).until(
+   EC.element_to_be_clickable((By.XPATH, "//html/body/div[12]/form/table/tbody/tr[4]/td/div"))
+)
+# Klikoni butonin e dërgimit
+submit_button.click() 
+# Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Replace with the desired URL after login
+target_url = "https://kfcal-live.iprojectdev.com/admin/#/Orders_monitor/1"
+driver.get(target_url)
+# Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+fullscreen_button = WebDriverWait(driver, 15).until(
+   EC.element_to_be_clickable((By.XPATH, "//html/body/div[3]/div/div/div/div[6]/div[1]/div[1]/div[3]/ul/li/a/i"))
+)
+
+
+# Klikoni butonin e dërgimit
+fullscreen_button.click() 
+# Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+switch_button = WebDriverWait(driver, 15).until(
+   EC.element_to_be_clickable((By.XPATH, "//html/body/div[3]/div/div/div/div[6]/div[1]/div[3]/div[2]/div[1]/div[5]/div[4]"))
+)
+
+
+# Klikoni butonin e dërgimit
+switch_button.click()
+# Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+tiles_button = WebDriverWait(driver, 15).until(
+   EC.element_to_be_clickable((By.XPATH, "//html/body/div[3]/div/div/div/div[6]/div[1]/div[3]/div[2]/div[1]/div[5]/div[5]/div[3]/label"))
+)
+
+
+# Klikoni butonin e dërgimit
+tiles_button.click()
+# Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+switch_button = WebDriverWait(driver, 15).until(
+   EC.element_to_be_clickable((By.XPATH, "//html/body/div[3]/div/div/div/div[6]/div[1]/div[3]/div[2]/div[1]/div[5]/div[4]"))
+)
+
+
+# Klikoni butonin e dërgimit
+switch_button.click()
+# Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+dropstore_button = WebDriverWait(driver, 15).until(
+   EC.element_to_be_clickable((By.XPATH, "//html/body/div[3]/div/div/div/div[6]/div[1]/div[3]/div[2]/div[1]/div[2]"))
+)
+
+
+# Klikoni butonin e dërgimit
+dropstore_button.click()
+# Pritni disa sekonda për të parë rezultatin pas logimit 
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+options = WebDriverWait(driver, 10).until(
+   EC.presence_of_all_elements_located((By.XPATH, "//ul[contains(@class, 'select2-results')]//li"))
+)
+
+
+# Zgjidhni opsionin e dëshiruar
+for option in options:
+   if "44088702 - KFC Toptani" in option.text:
+       option.click()
+       break
+   # Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+dropmonitor_button = WebDriverWait(driver, 15).until(
+   EC.element_to_be_clickable((By.XPATH, "//html/body/div[3]/div/div/div/div[6]/div[1]/div[3]/div[2]/div[1]/div[3]/div"))
+)
+
+
+# Klikoni butonin e dërgimit
+dropmonitor_button.click() 
+# Pritni disa sekonda për të parë rezultatin pas logimit
+time.sleep(5)
+
+
+# Gjeni butonin e dërgimit dhe klikoni
+options = WebDriverWait(driver, 10).until(
+   EC.presence_of_all_elements_located((By.XPATH, "//ul[contains(@class, 'select2-results')]//li"))
+)
+
+
+# Zgjidhni opsionin e dëshiruar
+for option in options:
+   if "Drinks" in option.text:
+       option.click()
+       break
+
+
+.Bat Script:
+
+
+Use git pull to fetch the latest version from GitHub, then run the Python script with python script_name.py. Put it on the windows startup tu run every start of pc.
+
+@echo off
+REM Navigo në folderin ku ke klonuar depozitën
+cd C:\Users\user\AppData\Local\Programs\Python\Python313\Scripts\kfc-scripts
+
+
+REM Tërheq versionin më të fundit nga GitHub
+git pull origin main
+
+
+REM Ekzekuto skriptin Python
+python kds.toptani-bucket.py
+
+
+REM Mbaj dritaren të hapur për të parë rezultatet
+pause
+
+
+
+
