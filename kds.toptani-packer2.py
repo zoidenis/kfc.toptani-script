@@ -139,6 +139,6 @@ options = WebDriverWait(driver, 10).until(
 
 # Zgjidhni opsionin e dëshiruar
 for option in options:
-    if "Super Packer2" in option.text:
+    if "Super Packer 2" in option.text:
         option.click()
         break
