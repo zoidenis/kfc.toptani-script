@@ -139,6 +139,6 @@ options = WebDriverWait(driver, 10).until(
 
 # Zgjidhni opsionin e dëshiruar
 for option in options:
-    if "Burgers" in option.text:
+    if "Burgers & Twisters" in option.text:
         option.click()
         break
